@@ -1,4 +1,5 @@
 # Chromatic-Community-Structure-Mathematica
+[![DOI](https://zenodo.org/badge/617035595.svg)](https://zenodo.org/badge/latestdoi/617035595)
 Chromatic Community Structure code in Mathematica
 package for Chromatic Community Structure analysis including the ChroCoDe algorithm. 
 The repository contains 3 files:
