@@ -31,7 +31,7 @@ BeginPackage["ChroCoS`"];
 (*Signatures & Usage*)
 
 
-$CHROCOLOR::usage="Basic palette of color (Association)"
+$CHROCOLOR::usage="Basic palette of 6 colors (Association)"
 
 
 $SEEDS::usage="Seeds for RandomColoring."
@@ -91,13 +91,7 @@ StyleBox[\"r\",\nFontSlant->\"Italic\"]\) colors. "
 Kcore::usage="Kcore[r,n,d,fenum] compute the core chromarity for a community of size n considering a d-color profile according to r colors with regard to the enumeration function fenum which is \[Kappa] or \[Gamma]."
 
 
-K\[Kappa]::usage="K\[Kappa][G,P] compute the \[Kappa]-chromarity of the community structure P according to graph G."
-
-
-K\[Gamma]::usage="K\[Gamma][G,P] compute the \[Gamma]-chromarity of the community structure P according to graph G."
-
-
-ChroCoDe::usage="ChroCoDe[G,\[Delta]:2,K] computes the chromatic community structure maximizing chromarity K for a colored graph G. \[Delta] is the neighborhood distance."
+ChroCoDe::usage="ChroCoDe[G,\[Delta]:2,\[Omega]] computes the chromatic community structure maximizing the \[Omega]-chromarity for a colored graph G. \[Delta] is the neighborhood distance (default 2)."
 
 
 (* ::Chapter:: *)
@@ -290,12 +284,8 @@ Kcore[r_Integer,n_Integer,d_Integer, fenum_]:=d/n (1 - fenum[r,n,d]/r^n)
 (*Chromarity  K *)
 
 
-K\[Kappa][G_Graph,P:{_List..}]:= With[{r= Max@AnnotationValue[G,VertexWeight],colorcount=Table[ Counts[AnnotationValue[{G,#},VertexWeight]&/@p],{p,P}]},
-Mean@Table[With[{n=Total[p], d=Max@KeyDrop[p,0]},If[d==-\[Infinity] \[Or] n==0, 0.,Kcore[r,n,d,\[Kappa]]]],{p,colorcount}]]
-
-
-K\[Gamma][G_Graph,P:{_List..}]:= With[{r= Max@AnnotationValue[G,VertexWeight],colorcount=Table[ Counts[AnnotationValue[{G,#},VertexWeight]&/@p],{p,P}]},
-Mean@Table[With[{n=Total[p], d=Max@KeyDrop[p,0]},If[d==-\[Infinity] \[Or] n==0, 0.,Kcore[r,n,d,\[Gamma]]]],{p,colorcount}]]
+K[G_Graph,P:{_List..}, \[Omega]_]:= With[{r= Max@AnnotationValue[G,VertexWeight],colorcount=Table[ Counts[AnnotationValue[{G,#},VertexWeight]&/@p],{p,P}]},
+Mean@Table[With[{n=Total[p], d=Max@KeyDrop[p,0]},If[d==-\[Infinity] \[Or] n==0, 0.,Kcore[r,n,d,\[Omega]]]],{p,colorcount}]]
 
 
 (* ::Input:: *)
@@ -306,8 +296,9 @@ Mean@Table[With[{n=Total[p], d=Max@KeyDrop[p,0]},If[d==-\[Infinity] \[Or] n==0, 
 (*ChroCoDe*)
 
 
-ChroCoDe[G_Graph, \[Delta]_Integer:2, K_]:= Module[{QG,V,v,c, neighbors, community,newincommunity, P,k,kmax, Pscan,p,q,improved,communitypath,maxpath, Pedges},
+ChroCoDe[G_Graph, \[Delta]_Integer:2, \[Omega]_]:= Module[{QG,V,v,c, neighbors, community,newincommunity, P,k,kmax, Pscan,p,q,improved,communitypath,maxpath, Pedges},
 P={};
+
 (* Build the first communities composed of connected vertices with the same color *)
 V=VertexList[G];
 While[V !={},
@@ -333,7 +324,7 @@ Function[ v1, AnyTrue[ p2,Function[v2,EdgeQ[G,v1 \[UndirectedEdge]v2]]]]]],P];
 Pscan =P;
 While[Pscan != {},
 (* Select a community according to an heuristic *)
- p=First@MinimalBy[Pscan,K[G,{#}]&];
+ p=First@MinimalBy[Pscan,K[G,{#},\[Omega]]&];
 Pscan=DeleteCases[Pscan,p] ;
 
 (* Find in the d-neighborhood of p the communities with the same color than p, d \[GreaterEqual] 2 *)
@@ -341,11 +332,11 @@ neighbors=DeleteCases[VertexList@NeighborhoodGraph[QG,p,\[Delta]],p];
 
 (* Best fusion of communities with p in the neighborhood of p maximizing K *)
 
-kmax= K[G,P];
+kmax= K[G,P,\[Omega]];
 improved=False;
 Do[
 communitypath=FindShortestPath[QG,p,q];
-k=K[G, Append[Complement[P,communitypath],Join@@communitypath]];
+k=K[G, Append[Complement[P,communitypath],Join@@communitypath],\[Omega]];
 If[kmax < k ,
 improved = True;
 kmax=k;
