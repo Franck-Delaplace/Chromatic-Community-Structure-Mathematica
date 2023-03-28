@@ -44,14 +44,13 @@ ChangeColor::usage="ChangeColor[G] interactively change the colors of the nodes 
 Select a color, drag a region where the color must be changed, then validate the modifications or reset it."
 
 
-ShowChroCoS::usage="ShowChroCoS[G,P,thickness:0.015,colors:$CHROCOLOR,communitycolor:ColorData[97]) show the community structure on the graph. The nodes in the same community have the same boundary color.
+ShowChroCoS::usage="ShowChroCoS[G,P,thickness:0.015,communitycolor:ColorData[97],colors:$CHROCOLOR) show the community structure on the graph. The nodes in the same community have the same boundary color.
 PARAMETER:
 \[FilledSmallSquare] G: Graph,
 \[FilledSmallSquare] P: community structure (list on lists),
 \[FilledSmallSquare] thickness (optional): thickness of the boundary (default 0.015),
+ communitycolor (optional): function of association defining the colors of the communities (default ColorData[97]),
 \[FilledSmallSquare] colors (optional): function or association defining the colors of the nodes (default $CHROCOLOR palette),
-\[FilledSmallSquare] community color (optional): function of association defining the colors of the communities (default ColorData[97]),
-OPTION: GraphLayout,ImageSize
 "
 
 
@@ -141,7 +140,7 @@ Column[{SetterBar[Dynamic[color],colors, Appearance->"Vertical"],ButtonBar[{ok:>
 ,Left]]]
 
 
-ShowChroCoS[GC_Graph,P_List,thickness_Real:0.015,colors_:$CHROCOLOR,communitycolors_:ColorData[97]]:=
+ShowChroCoS[GC_Graph,P_List,thickness_Real:0.015,communitycolors_:ColorData[97],colors_:$CHROCOLOR]:=
 Annotate[GC, 
 {
 VertexStyle->Flatten@Table[  Function[v,v->Directive[ EdgeForm[{Opacity[1],Thickness[thickness],communitycolors[i]}],colors[AnnotationValue[{GC,v},VertexWeight]]]]/@P[[i]],{i,Length[P]}]}]
